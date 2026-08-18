@@ -1,4 +1,38 @@
 .venv/
 __pycache__/
 *.pyc
+.env# Virtual environment
+.venv/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables / secrets
 .env
+.env.*
+
+# Hugging Face cache
+.cache/
+huggingface_cache/
+
+# Model artifacts
+models/
+*.pkl
+*.joblib
+
+# Logs
+*.log
