@@ -1,0 +1,11 @@
+pandas
+scikit-learn
+scipy
+joblib
+datasets
+matplotlib
+fastapi
+uvicorn[standard]
+pydantic
+requests
+pytest
