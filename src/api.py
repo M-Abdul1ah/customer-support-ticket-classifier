@@ -3,6 +3,8 @@ import joblib
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
+from business_rules import apply_business_rules
+
 
 # ==========================================
 # 1. Application setup
@@ -103,12 +105,26 @@ def predict_ticket(request: TicketRequest):
     else:
         status = "REVIEW"
 
+    # Business rules layer: department routing, priority, and
+    # keyword-based escalation overrides (e.g. fraud/security language
+    # always goes to a human, regardless of model confidence).
+    routing = apply_business_rules(
+        text=text,
+        intent=prediction,
+        confidence=confidence,
+        status=status,
+    )
+
+    if routing["requires_human"]:
+        status = "REVIEW"
+
     return {
         "ticket": text,
         "intent": prediction,
         "confidence": round(confidence, 4),
         "threshold": THRESHOLD,
-        "status": status
+        "status": status,
+        **routing,
     }
 
 

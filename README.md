@@ -18,11 +18,21 @@ The API returns:
   "intent": "recover_password",
   "confidence": 0.97,
   "threshold": 0.90,
-  "status": "AUTO"
+  "status": "AUTO",
+  "department": "account_support",
+  "priority": "normal",
+  "requires_human": false,
+  "escalation_reason": null
 }
 ```
 
-If confidence is below the threshold, `status` becomes `REVIEW`, meaning the ticket should be routed to a human agent instead of handled automatically.
+If confidence is below the threshold, `status` becomes `REVIEW` and `requires_human` becomes `true`, meaning the ticket should be routed to a human agent instead of handled automatically.
+
+### Business rules layer
+
+`intent` and `confidence` come from the ML model. Everything else (`department`, `priority`, `requires_human`, `escalation_reason`) comes from `src/business_rules.py` — a separate, non-ML layer that decides what to *do* with a prediction. This is deliberately kept apart from the model so routing/priority policy can change without retraining anything.
+
+One important rule lives here: if a ticket contains language suggesting fraud, unauthorized access, or a security issue, it is **always** escalated to a human and marked high priority — even if the model is highly confident about the predicted intent. Confidence measures how sure the model is about the *intent*, not how safe it is to fully automate a *sensitive* ticket.
 
 ## Dataset
 
@@ -117,8 +127,8 @@ pytest tests/test_api.py
 | Confidence threshold analysis | ✅ Done |
 | FastAPI service | ✅ Done |
 | Tests (unit + API) | ✅ Done |
+| Business-rule routing layer (priority, department, escalation) | ✅ Done |
 | n8n automation workflow | ⬜ Not started |
-| Business-rule routing layer (priority, department) | ⬜ Not started |
 | Docker | ⬜ Not started |
 | Deployment | ⬜ Not started |
 

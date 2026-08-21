@@ -2,6 +2,8 @@ from pathlib import Path
 
 import joblib
 
+from business_rules import apply_business_rules
+
 
 # ==========================================
 # PROJECT PATHS
@@ -71,11 +73,28 @@ def predict_ticket(ticket: str) -> dict:
     else:
         status = "REVIEW"
 
+    # Business rules layer: department routing, priority, and
+    # keyword-based escalation overrides. Kept separate from the
+    # model so routing/priority logic can change without retraining.
+    routing = apply_business_rules(
+        text=ticket,
+        intent=prediction,
+        confidence=confidence,
+        status=status,
+    )
+
+    # Keep "status" consistent with "requires_human": if a business rule
+    # forced escalation (e.g. a fraud/security keyword), the ticket is no
+    # longer AUTO just because the model was confident about the intent.
+    if routing["requires_human"]:
+        status = "REVIEW"
+
     return {
         "ticket": ticket,
         "intent": prediction,
         "confidence": round(confidence, 4),
         "status": status,
+        **routing,
     }
 
 
