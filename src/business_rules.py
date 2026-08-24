@@ -147,10 +147,15 @@ def matched_escalation_keyword(text: str) -> Optional[str]:
     Return the first escalation keyword found in the text, or None.
     Simple substring match on lowercased text — intentionally simple
     and easy to audit/extend, not a full NLP pass.
+
+    Keywords are checked longest-first so that e.g. "hacked" wins over
+    "hack" when both are present as substrings. Without this, Python's
+    set iteration order is unspecified and the match returned could
+    silently change between runs.
     """
     lowered = text.lower()
 
-    for keyword in ESCALATION_KEYWORDS:
+    for keyword in sorted(ESCALATION_KEYWORDS, key=len, reverse=True):
         if keyword in lowered:
             return keyword
 
