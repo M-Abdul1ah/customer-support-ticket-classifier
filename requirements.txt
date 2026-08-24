@@ -9,3 +9,4 @@ uvicorn[standard]
 pydantic
 requests
 pytest
+httpx==0.28.1
